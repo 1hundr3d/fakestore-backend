@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог — MyStore</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header">
+        <a href="index.html" class="logo">🛍️ MyStore</a>
+        <nav class="header-nav">
+            <a href="index.html" class="active">Каталог</a>
+            <a href="cart.html">Корзина <span id="cart-count" class="badge">0</span></a>
+            <a href="login.html" id="login-link">Войти</a>
+            <span id="user-greeting" class="user-greeting" style="display:none;"></span>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="catalog-header">
+            <h1>Все товары</h1>
+            <div class="search-bar">
+                <input type="text" id="search" placeholder="Поиск по названию...">
+            </div>
+        </div>
+        <div id="product-grid" class="product-grid">
+            <!-- Товары будут загружены через JS -->
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:8000';
+        const token = localStorage.getItem('token');
+
+        // Обновление навигации (кто вошёл, счётчик корзины)
+        async function updateNav() {
+            if (token) {
+                document.getElementById('login-link').style.display = 'none';
+                const greet = document.getElementById('user-greeting');
+                greet.style.display = 'inline';
+                // Попытаемся получить имя пользователя из токена (или захардкодим "Пользователь")
+                greet.textContent = '👤 ' + (localStorage.getItem('username') || 'Пользователь');
+            }
+            if (token) {
+                try {
+                    const res = await fetch(`${API}/cart`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const items = await res.json();
+                        document.getElementById('cart-count').textContent = items.length;
+                    }
+                } catch(e) {}
+            }
+        }
+
+        // Загрузка товаров
+        async function loadProducts(search = '') {
+            const url = search ? `${API}/products?search=${encodeURIComponent(search)}` : `${API}/products`;
+            const res = await fetch(url);
+            const products = await res.json();
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = products.map(p => `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${p.image}" alt="${p.title}">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">${p.title}</h3>
+                        <p class="product-desc">${p.description.slice(0, 80)}...</p>
+                        <div class="product-footer">
+                            <span class="product-price">$${p.price}</span>
+                            <button class="btn-add-cart" onclick="addToCart(${p.id})" ${!token ? 'disabled' : ''}>
+                                ${token ? 'В корзину' : 'Войдите'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Добавление в корзину
+        async function addToCart(productId) {
+            if (!token) return alert('Сначала войдите');
+            const res = await fetch(`${API}/cart`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ product_id: productId, quantity: 1 })
+            });
+            if (res.ok) {
+                updateNav(); // обновим счётчик
+                alert('Добавлено в корзину!');
+            } else {
+                alert('Ошибка добавления');
+            }
+        }
+
+        // Поиск по мере ввода
+        document.getElementById('search').addEventListener('input', (e) => {
+            loadProducts(e.target.value);
+        });
+
+        // Инициализация
+        loadProducts();
+        updateNav();
+    </script>
+</body>
+</html>

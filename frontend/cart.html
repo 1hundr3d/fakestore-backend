@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина — MyStore</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header">
+        <a href="index.html" class="logo">🛍️ MyStore</a>
+        <nav class="header-nav">
+            <a href="index.html">Каталог</a>
+            <a href="cart.html" class="active">Корзина <span id="cart-count" class="badge">0</span></a>
+            <a href="login.html" id="login-link">Войти</a>
+            <span id="user-greeting" class="user-greeting" style="display:none;"></span>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Корзина</h1>
+        <div id="cart-items">
+            <!-- Товары будут загружены через JS -->
+        </div>
+        <div id="cart-summary" class="cart-summary" style="display:none;">
+            <div class="cart-total">
+                <span>Итого:</span>
+                <strong id="total-price">$0.00</strong>
+            </div>
+            <button class="btn-primary" id="checkout-btn">Оформить заказ</button>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:8000';
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            document.getElementById('cart-items').innerHTML = '<p class="empty-message">Войдите, чтобы увидеть корзину.</p>';
+        } else {
+            document.getElementById('login-link').style.display = 'none';
+            document.getElementById('user-greeting').style.display = 'inline';
+            document.getElementById('user-greeting').textContent = '👤 ' + (localStorage.getItem('username') || 'Пользователь');
+            loadCart();
+        }
+
+        async function loadCart() {
+            try {
+                const res = await fetch(`${API}/cart`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Ошибка загрузки');
+                const items = await res.json();
+                renderCart(items);
+            } catch(e) {
+                document.getElementById('cart-items').innerHTML = '<p class="error-message">Не удалось загрузить корзину</p>';
+            }
+        }
+
+        function renderCart(items) {
+            const container = document.getElementById('cart-items');
+            const summary = document.getElementById('cart-summary');
+            document.getElementById('cart-count').textContent = items.length;
+
+            if (!items.length) {
+                container.innerHTML = '<p class="empty-message">Корзина пуста</p>';
+                summary.style.display = 'none';
+                return;
+            }
+
+            summary.style.display = 'block';
+            let total = 0;
+            container.innerHTML = items.map(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                return `
+                    <div class="cart-item">
+                        <div class="cart-item-image">
+                            <img src="${item.image || 'https://via.placeholder.com/80'}" alt="${item.title}">
+                        </div>
+                        <div class="cart-item-info">
+                            <h3>${item.title}</h3>
+                            <div class="cart-item-controls">
+                                <span class="quantity">${item.quantity} шт.</span>
+                                <span class="item-total">$${itemTotal.toFixed(2)}</span>
+                                <button class="btn-remove" onclick="removeFromCart(${item.id})">✕</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('total-price').textContent = `$${total.toFixed(2)}`;
+        }
+
+        async function removeFromCart(itemId) {
+            await fetch(`${API}/cart/${itemId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            loadCart(); // обновляем список
+        }
+
+        document.getElementById('checkout-btn').addEventListener('click', () => {
+            alert('Заказ оформлен! (заглушка)');
+            // Здесь можно добавить запрос на оформление заказа
+        });
+    </script>
+</body>
+</html>
