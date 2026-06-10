@@ -25,6 +25,12 @@ class ProductOut(BaseModel):
     class Config:
         orm_mode = True
 
+class ProductCreate(BaseModel):
+    title: str
+    price: float
+    description: Optional[str] = None
+    image: Optional[str] = None
+
 #Модели для корзины
 class CartItemCreate(BaseModel):
     product_id: int
