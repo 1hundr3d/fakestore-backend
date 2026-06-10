@@ -5,7 +5,7 @@ from app.models import Products
 from app.schemas import ProductOut, ProductCreate
 from typing import Optional
 
-router = APIRouter(prefix="/products", tags=["products"])
+router = APIRouter(prefix="/products", tags=["products"], redirect_slashes=False)
 
 @router.get("/", response_model=list[ProductOut])
 async def products(search: Optional[str] = None, db: Session=Depends(get_db)):
