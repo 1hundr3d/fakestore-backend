@@ -30,7 +30,7 @@
     </div>
 
     <script>
-        const API = 'https://literate-space-acorn-jjwxrjjgr6vpcq97j-8000.app.github.dev';
+        const API = 'https://' + window.location.hostname.replace('-8080', '-8000');
         const token = localStorage.getItem('token');
 
         // Обновление навигации (кто вошёл, счётчик корзины)
