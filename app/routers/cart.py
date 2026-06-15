@@ -14,7 +14,7 @@ async def get_cart(current_user: UserDB=Depends(get_current_user), db: Session=D
     result = []
     for item in all_items:
         product = db.query(Products).filter(Products.id == item.product_id).first()
-        result.append(CartItemOut(id = item.id, title = product.title, price = product.price, quantity = product.quantity, image = product.image))
+        result.append(CartItemOut(id = item.id, title = product.title, price = product.price, quantity = item.quantity, image = product.image))
     return result
 
 @router.post("/")
