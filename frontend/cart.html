@@ -46,7 +46,7 @@
 
         async function loadCart() {
             try {
-                const res = await fetch(`${API}/cart`, {
+                const res = await fetch(`${API}/cart/`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) throw new Error('Ошибка загрузки');
@@ -93,7 +93,7 @@
         }
 
         async function removeFromCart(itemId) {
-            await fetch(`${API}/cart/${itemId}`, {
+            await fetch(`${API}/cart/${itemId}/`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

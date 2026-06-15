@@ -44,7 +44,7 @@
             }
             if (token) {
                 try {
-                    const res = await fetch(`${API}/cart`, {
+                    const res = await fetch(`${API}/cart/`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (res.ok) {
