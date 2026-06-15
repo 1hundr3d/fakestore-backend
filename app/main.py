@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.routers.auth import router as auth_router
-from app.routers import products
+from app.routers import products, cart
 from contextlib import asynccontextmanager
 import logging
 
@@ -27,3 +27,4 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(products.router)
+app.include_router(cart.router)

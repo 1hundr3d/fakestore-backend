@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import CartItem, Products
+from app.models import CartItem, Products, UserDB
 from app.schemas import CartItemCreate, CartItemOut
 from app.auth import get_current_user
 
@@ -18,7 +18,7 @@ async def get_cart(current_user: UserDB=Depends(get_current_user), db: Session=D
     return result
 
 @router.post("/")
-async def add_cart(current_user: UserDB=Depends(get_current_user), db: Session=Depends(get_db), cart_data: CartItemCreate):
+async def add_cart(cart_data: CartItemCreate, current_user: UserDB=Depends(get_current_user), db: Session=Depends(get_db)):
     if db.query(Products).filter(Products.id == cart_data.product_id).first() is None:
         raise HTTPException(status_code=404, detail='Товар не найден')
     existing_item = db.query(CartItem).filter(CartItem.user_id == current_user.id, CartItem.product_id == cart_data.product_id).first()
@@ -31,3 +31,14 @@ async def add_cart(current_user: UserDB=Depends(get_current_user), db: Session=D
         db.add(new_item)
         db.commit()
     return {"status":"ok"}
+
+@router.delete("/{item_id}")
+async def delete_item(item_id: int, current_user: UserDB=Depends(get_current_user), db: Session=Depends(get_db)):
+    item = db.query(CartItem).filter(CartItem.id == item_id, CartItem.user_id == current_user.id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail='Товар не найден')
+
+    db.delete(item)
+    db.commit()
+
+    return {"status": "deleted"}
