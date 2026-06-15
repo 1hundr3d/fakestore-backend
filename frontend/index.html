@@ -83,7 +83,7 @@
         // Добавление в корзину
         async function addToCart(productId) {
             if (!token) return alert('Сначала войдите');
-            const res = await fetch(`${API}/cart`, {
+            const res = await fetch(`${API}/cart/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
