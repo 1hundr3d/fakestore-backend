@@ -24,11 +24,10 @@ def verify_password(password: str, hashed_password:str) -> bool:
     return pwd_context.verify(password, hashed_password)
 
 #JWT
-def create_token(data: dict) -> str:
-    payload = data.copy()
-    payload["exp"] = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    token = jwt.encode(payload, SECRET_KEY, ALGORITHM)
-    return token
+def create_access_token(username: str) -> str:
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    payload = {"sub": username, "exp": expire}
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 #Получаем нужного пользователя
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
