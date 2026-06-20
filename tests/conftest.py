@@ -59,3 +59,15 @@ def token(client, db_session):
 def authorized_client(client, token):
     client.headers.update({"Authorization": f"Bearer {token}"})
     return client
+
+@pytest.fixture(scope='function')
+def product_for_test(authorized_client):
+    product_data = {
+        "title": "testproduct",
+        "price": 12345.123,
+        "description": "testproduct",
+        "image": "testproduct.url"
+    }
+    product = authorized_client.post("/products/", json = product_data)
+    product_data_response = product.json()
+    return product_data_response["id"]
