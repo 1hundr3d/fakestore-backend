@@ -57,8 +57,10 @@ def token(client, db_session):
 
 @pytest.fixture(scope='function')
 def authorized_client(client, token):
+    client.headers.clear()
     client.headers.update({"Authorization": f"Bearer {token}"})
-    return client
+    yield client
+    client.headers.clear()
 
 @pytest.fixture(scope='function')
 def product_for_test(authorized_client):
