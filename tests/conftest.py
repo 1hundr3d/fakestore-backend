@@ -15,7 +15,7 @@ TEST_DATABASE_URL = os.getenv(
     'sqlite:///./test.db'
 )
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def create_test_db(engine):
     Base.metadata.create_all(bind=engine)
 
