@@ -45,6 +45,7 @@ def test_remove_from_cart(authorized_client, product_for_test):
     assert len(response_get_data) == 0
 
 def test_add_to_cart_unauthorized(client, product_for_test):
+    client.headers.clear()
     response = client.post("/cart/", json = {
         "product_id": product_for_test,
         "quantity": 1
