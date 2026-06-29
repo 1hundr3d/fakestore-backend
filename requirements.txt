@@ -9,3 +9,4 @@ python-dotenv==1.0.1
 python-multipart==0.0.28
 pytest==9.0.2
 httpx2==2.4.0
+alembic==1.18.4

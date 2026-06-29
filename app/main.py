@@ -5,13 +5,15 @@ from app.routers.auth import router as auth_router
 from app.routers import products, cart
 from contextlib import asynccontextmanager
 import logging
+import subprocess
 
 logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Сервер запускается")
-    Base.metadata.create_all(bind=engine)
+    subprocess.run(["alembic", "upgrade", "head"], check=True)
+    logger.info("Миграции выполнены")
     yield
     logger.info("Сервер выключается")
 
