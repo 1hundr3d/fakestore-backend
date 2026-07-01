@@ -6,6 +6,7 @@ from app.routers import products, cart
 from contextlib import asynccontextmanager
 import logging
 import subprocess
+from prometheus_fastapi_instrumentator import Instrumentator
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,9 @@ async def lifespan(app: FastAPI):
     logger.info("Сервер выключается")
 
 app = FastAPI(title='FakeStore Backend', lifespan=lifespan)
+
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,
