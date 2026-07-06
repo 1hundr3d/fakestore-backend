@@ -92,7 +92,7 @@
             const data = await res.json();
             if (res.ok) {
                 localStorage.setItem('token', data.access_token);
-                window.location.href = 'index.html';
+                window.location.href = '/index.html';
             } else {
                 document.getElementById('register-message').textContent = data.detail || 'Ошибка регистрации';
             }
