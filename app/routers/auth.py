@@ -5,7 +5,7 @@ from app.models import UserDB
 from app.schemas import UserRegister, UserLogin, Token
 from app.auth import hash_password, verify_password, create_access_token
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"], redirect_slashes=False)
 
 @router.post("/register", response_model = Token)
 async def register(user_data: UserRegister, db: Session=Depends(get_db)):
