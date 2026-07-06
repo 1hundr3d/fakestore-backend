@@ -25,21 +25,18 @@
             </div>
         </div>
         <div id="product-grid" class="product-grid">
-            <!-- Товары будут загружены через JS -->
         </div>
     </div>
 
     <script>
-        const API = 'https://literate-space-acorn-jjwxrjjgr6vpcq97j-8000.app.github.dev';
+        const API = '';
         const token = localStorage.getItem('token');
 
-        // Обновление навигации (кто вошёл, счётчик корзины)
         async function updateNav() {
             if (token) {
                 document.getElementById('login-link').style.display = 'none';
                 const greet = document.getElementById('user-greeting');
                 greet.style.display = 'inline';
-                // Попытаемся получить имя пользователя из токена (или захардкодим "Пользователь")
                 greet.textContent = '👤 ' + (localStorage.getItem('username') || 'Пользователь');
             }
             if (token) {
@@ -55,7 +52,6 @@
             }
         }
 
-        // Загрузка товаров
         async function loadProducts(search = '') {
             const url = search ? `${API}/products/?search=${encodeURIComponent(search)}` : `${API}/products/`;
             const res = await fetch(url);
@@ -80,7 +76,6 @@
             `).join('');
         }
 
-        // Добавление в корзину
         async function addToCart(productId) {
             if (!token) return alert('Сначала войдите');
             const res = await fetch(`${API}/cart/`, {
@@ -92,19 +87,17 @@
                 body: JSON.stringify({ product_id: productId, quantity: 1 })
             });
             if (res.ok) {
-                updateNav(); // обновим счётчик
+                updateNav();
                 alert('Добавлено в корзину!');
             } else {
                 alert('Ошибка добавления');
             }
         }
 
-        // Поиск по мере ввода
         document.getElementById('search').addEventListener('input', (e) => {
             loadProducts(e.target.value);
         });
 
-        // Инициализация
         loadProducts();
         updateNav();
     </script>

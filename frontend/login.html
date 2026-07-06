@@ -14,7 +14,6 @@
                 <button class="tab active" id="tab-login">Вход</button>
                 <button class="tab" id="tab-register">Регистрация</button>
             </div>
-            <!-- Форма входа -->
             <div id="login-form" class="auth-form active">
                 <div class="form-group">
                     <label for="login-username">Логин</label>
@@ -27,7 +26,6 @@
                 <button id="login-button" class="btn-primary">Войти</button>
                 <p id="login-message" class="message"></p>
             </div>
-            <!-- Форма регистрации -->
             <div id="register-form" class="auth-form">
                 <div class="form-group">
                     <label for="reg-username">Логин</label>
@@ -43,9 +41,8 @@
         </div>
     </div>
     <script>
-        const API = 'https://literate-space-acorn-jjwxrjjgr6vpcq97j-8000.app.github.dev';
+        const API = '';
 
-        // Переключение вкладок
         document.getElementById('tab-login').addEventListener('click', () => {
             document.getElementById('login-form').classList.add('active');
             document.getElementById('register-form').classList.remove('active');
@@ -59,7 +56,6 @@
             document.getElementById('tab-login').classList.remove('active');
         });
 
-        // Логин
         document.getElementById('login-button').addEventListener('click', async () => {
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
@@ -67,7 +63,7 @@
                 document.getElementById('login-message').textContent = 'Введите логин и пароль';
                 return;
             }
-            const res = await fetch(`${API}/auth/login/`, {
+            const res = await fetch('/auth/login/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -81,7 +77,6 @@
             }
         });
 
-        // Регистрация
         document.getElementById('reg-button').addEventListener('click', async () => {
             const username = document.getElementById('reg-username').value;
             const password = document.getElementById('reg-password').value;
@@ -89,7 +84,7 @@
                 document.getElementById('register-message').textContent = 'Введите логин и пароль';
                 return;
             }
-            const res = await fetch(`${API}/auth/register/`, {
+            const res = await fetch('/auth/register/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })

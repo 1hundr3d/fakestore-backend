@@ -20,7 +20,6 @@
     <div class="container">
         <h1>Корзина</h1>
         <div id="cart-items">
-            <!-- Товары будут загружены через JS -->
         </div>
         <div id="cart-summary" class="cart-summary" style="display:none;">
             <div class="cart-total">
@@ -32,7 +31,7 @@
     </div>
 
     <script>
-        const API = 'https://literate-space-acorn-jjwxrjjgr6vpcq97j-8000.app.github.dev';
+        const API = '';
         const token = localStorage.getItem('token');
 
         if (!token) {
@@ -97,12 +96,11 @@
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            loadCart(); // обновляем список
+            loadCart();
         }
 
         document.getElementById('checkout-btn').addEventListener('click', () => {
             alert('Заказ оформлен! (заглушка)');
-            // Здесь можно добавить запрос на оформление заказа
         });
     </script>
 </body>
