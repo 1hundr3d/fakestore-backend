@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход — MyStore</title>
-    <!-- Подключаем стили (будут ниже) -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -25,7 +24,7 @@
                     <label for="login-password">Пароль</label>
                     <input type="password" id="login-password" placeholder="Введите пароль" required>
                 </div>
-                <button type="submit" class="btn-primary">Войти</button>
+                <button id="login-button" class="btn-primary">Войти</button>
                 <p id="login-message" class="message"></p>
             </form>
             <!-- Форма регистрации -->
@@ -38,7 +37,7 @@
                     <label for="reg-password">Пароль</label>
                     <input type="password" id="reg-password" placeholder="Придумайте пароль" required>
                 </div>
-                <button type="submit" class="btn-primary">Зарегистрироваться</button>
+                <button id="reg-button" class="btn-primary">Зарегистрироваться</button>
                 <p id="register-message" class="message"></p>
             </form>
         </div>
@@ -61,7 +60,7 @@
         });
 
         // Логин
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
+        document.getElementById('login-button').addEventListener('click', async (e) => {
             e.preventDefault();
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
@@ -80,7 +79,7 @@
         });
 
         // Регистрация
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
+        document.getElementById('reg-button').addEventListener('click', async (e) => {
             e.preventDefault();
             const username = document.getElementById('reg-username').value;
             const password = document.getElementById('reg-password').value;
