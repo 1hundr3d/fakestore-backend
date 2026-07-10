@@ -7,7 +7,12 @@ from typing import Optional
 from app.auth import get_current_user
 from app.cache import set_cache, get_cache, delete_cache
 
+from app.discounts.strategies import NoDiscount, SeasonalDiscount
+
 router = APIRouter(prefix="/products", tags=["products"], redirect_slashes=False)
+
+discount_strategy = SeasonalDiscount({12: 0.15, 1: 0.10})
+# discount_strategy = NoDiscount
 
 @router.get("/", response_model=list[ProductOut])
 async def products(search: Optional[str] = None, db: Session=Depends(get_db)):
@@ -16,11 +21,30 @@ async def products(search: Optional[str] = None, db: Session=Depends(get_db)):
     
     if not search:
         cached = get_cache("products:list")
+
         if cached is not None:
-            return cached
+            discounted_products = []
+            for item in cached:
+                new_item = item.copy()
+                new_price = discount_strategy.apply(item["price"])
+                new_item["price"] = new_price
+                discounted_products.append(new_item)
+            return discounted_products
+
         all_products = db.query(Products).all()
-        set_cache("products:list", all_products, ttl=300)
-        return all_products
+
+        result = []
+        for p in all_products:
+            result.append({
+                "id": p.id,
+                "title": p.title,
+                "price": discount_strategy.apply(p.price),
+                "description": p.description,
+                "image": p.image
+            })
+
+        set_cache("products:list", result, ttl=300)
+        return result
 
 @router.post("/", response_model=ProductOut)
 async def create_product(product_data: ProductCreate, db: Session=Depends(get_db), current_user: UserDB=Depends(get_current_user)):

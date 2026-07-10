@@ -41,61 +41,127 @@
         </div>
     </div>
     <script>
+        // API базовый URL - используется относительный путь, так как nginx проксирует все запросы
         const API = '';
 
+        // Функция для отображения сообщений
+        function showMessage(elementId, message, isError = true) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = isError ? 'message error' : 'message success';
+        }
+
+        // Переключение между вкладками
         document.getElementById('tab-login').addEventListener('click', () => {
             document.getElementById('login-form').classList.add('active');
             document.getElementById('register-form').classList.remove('active');
             document.getElementById('tab-login').classList.add('active');
             document.getElementById('tab-register').classList.remove('active');
+            // Очищаем сообщения
+            document.getElementById('login-message').textContent = '';
+            document.getElementById('register-message').textContent = '';
         });
+
         document.getElementById('tab-register').addEventListener('click', () => {
             document.getElementById('register-form').classList.add('active');
             document.getElementById('login-form').classList.remove('active');
             document.getElementById('tab-register').classList.add('active');
             document.getElementById('tab-login').classList.remove('active');
+            // Очищаем сообщения
+            document.getElementById('login-message').textContent = '';
+            document.getElementById('register-message').textContent = '';
         });
 
+        // Обработчик входа
         document.getElementById('login-button').addEventListener('click', async () => {
-            const username = document.getElementById('login-username').value;
+            const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value;
+
             if (!username || !password) {
-                document.getElementById('login-message').textContent = 'Введите логин и пароль';
+                showMessage('login-message', 'Введите логин и пароль', true);
                 return;
             }
-            const res = await fetch('/auth/login/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                localStorage.setItem('token', data.access_token);
-                window.location.href = '/index.html';
-            } else {
-                document.getElementById('login-message').textContent = data.detail || 'Ошибка входа';
+
+            try {
+                const res = await fetch(`${API}/auth/login/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Сохраняем токен и имя пользователя
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('username', username);
+                    // Перенаправляем на главную
+                    window.location.href = 'index.html';
+                } else {
+                    showMessage('login-message', data.detail || 'Ошибка входа', true);
+                }
+            } catch (e) {
+                console.error('Ошибка при входе:', e);
+                showMessage('login-message', 'Не удалось подключиться к серверу', true);
             }
         });
 
+        // Обработчик регистрации
         document.getElementById('reg-button').addEventListener('click', async () => {
-            const username = document.getElementById('reg-username').value;
+            const username = document.getElementById('reg-username').value.trim();
             const password = document.getElementById('reg-password').value;
+
             if (!username || !password) {
-                document.getElementById('register-message').textContent = 'Введите логин и пароль';
+                showMessage('register-message', 'Введите логин и пароль', true);
                 return;
             }
-            const res = await fetch('/auth/register/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                localStorage.setItem('token', data.access_token);
-                window.location.href = '/index.html';
-            } else {
-                document.getElementById('register-message').textContent = data.detail || 'Ошибка регистрации';
+
+            if (username.length < 3) {
+                showMessage('register-message', 'Логин должен быть не менее 3 символов', true);
+                return;
             }
+
+            if (password.length < 6) {
+                showMessage('register-message', 'Пароль должен быть не менее 6 символов', true);
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/auth/register/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Сохраняем токен и имя пользователя
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('username', username);
+                    // Перенаправляем на главную
+                    window.location.href = 'index.html';
+                } else {
+                    showMessage('register-message', data.detail || 'Ошибка регистрации', true);
+                }
+            } catch (e) {
+                console.error('Ошибка при регистрации:', e);
+                showMessage('register-message', 'Не удалось подключиться к серверу', true);
+            }
+        });
+
+        // Обработка нажатия Enter
+        document.getElementById('login-username').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('login-button').click();
+        });
+        document.getElementById('login-password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('login-button').click();
+        });
+        document.getElementById('reg-username').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('reg-button').click();
+        });
+        document.getElementById('reg-password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('reg-button').click();
         });
     </script>
 </body>

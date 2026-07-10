@@ -26,11 +26,23 @@
         </div>
         <div id="product-grid" class="product-grid">
         </div>
+        <div id="error-message" class="error-message" style="display:none;"></div>
     </div>
 
     <script>
+        // API базовый URL - используется относительный путь, так как nginx проксирует все запросы
         const API = '';
         const token = localStorage.getItem('token');
+
+        // Функция для отображения ошибок
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
 
         async function updateNav() {
             if (token) {
@@ -48,49 +60,79 @@
                         const items = await res.json();
                         document.getElementById('cart-count').textContent = items.length;
                     }
-                } catch(e) {}
+                } catch(e) {
+                    console.error('Ошибка при загрузке корзины:', e);
+                }
             }
         }
 
         async function loadProducts(search = '') {
-            const url = search ? `${API}/products/?search=${encodeURIComponent(search)}` : `${API}/products/`;
-            const res = await fetch(url);
-            const products = await res.json();
-            const grid = document.getElementById('product-grid');
-            grid.innerHTML = products.map(p => `
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="${p.image}" alt="${p.title}">
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">${p.title}</h3>
-                        <p class="product-desc">${p.description.slice(0, 80)}...</p>
-                        <div class="product-footer">
-                            <span class="product-price">$${p.price}</span>
-                            <button class="btn-add-cart" onclick="addToCart(${p.id})" ${!token ? 'disabled' : ''}>
-                                ${token ? 'В корзину' : 'Войдите'}
-                            </button>
+            try {
+                const url = search ? `${API}/products/?search=${encodeURIComponent(search)}` : `${API}/products/`;
+                const res = await fetch(url);
+                
+                if (!res.ok) {
+                    throw new Error(`Ошибка сервера: ${res.status}`);
+                }
+                
+                const products = await res.json();
+                const grid = document.getElementById('product-grid');
+                
+                if (products.length === 0) {
+                    grid.innerHTML = '<p class="empty-message">Товары не найдены</p>';
+                    return;
+                }
+                
+                grid.innerHTML = products.map(p => `
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="${p.image}" alt="${p.title}" onerror="this.src='https://via.placeholder.com/200?text=No+Image'">
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">${p.title}</h3>
+                            <p class="product-desc">${p.description ? p.description.slice(0, 80) + '...' : 'Описание отсутствует'}</p>
+                            <div class="product-footer">
+                                <span class="product-price">$${p.price}</span>
+                                <button class="btn-add-cart" onclick="addToCart(${p.id})" ${!token ? 'disabled' : ''}>
+                                    ${token ? 'В корзину' : 'Войдите'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (e) {
+                console.error('Ошибка при загрузке товаров:', e);
+                showError('Не удалось загрузить товары. Проверьте подключение к серверу.');
+            }
         }
 
         async function addToCart(productId) {
-            if (!token) return alert('Сначала войдите');
-            const res = await fetch(`${API}/cart/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ product_id: productId, quantity: 1 })
-            });
-            if (res.ok) {
-                updateNav();
-                alert('Добавлено в корзину!');
-            } else {
-                alert('Ошибка добавления');
+            if (!token) {
+                alert('Сначала войдите в систему');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API}/cart/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ product_id: productId, quantity: 1 })
+                });
+                
+                if (res.ok) {
+                    updateNav();
+                    alert('Добавлено в корзину!');
+                } else {
+                    const error = await res.json();
+                    alert(`Ошибка: ${error.detail || 'Не удалось добавить в корзину'}`);
+                }
+            } catch (e) {
+                console.error('Ошибка при добавлении в корзину:', e);
+                alert('Произошла ошибка при добавлении в корзину');
             }
         }
 
@@ -98,6 +140,7 @@
             loadProducts(e.target.value);
         });
 
+        // Загружаем товары и обновляем навигацию при загрузке страницы
         loadProducts();
         updateNav();
     </script>
