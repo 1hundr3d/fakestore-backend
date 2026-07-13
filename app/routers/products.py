@@ -9,6 +9,12 @@ from app.cache import set_cache, get_cache, delete_cache
 
 from app.discounts.strategies import NoDiscount, SeasonalDiscount
 
+from app.observers import ProductSubject, LoggerObserver, EmailObserver
+
+product_subject = ProductSubject()
+product_subject.attach(LoggerObserver)
+product_subject.attach(EmailObserver)
+
 router = APIRouter(prefix="/products", tags=["products"], redirect_slashes=False)
 
 discount_strategy = SeasonalDiscount({12: 0.15, 1: 0.10})
@@ -53,4 +59,5 @@ async def create_product(product_data: ProductCreate, db: Session=Depends(get_db
     db.commit()
     db.refresh(new_product)
     delete_cache("products:list")
+    product_subject.notify(f"Новый товар создан: {product_data.title}")
     return new_product
