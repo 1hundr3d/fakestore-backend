@@ -11,6 +11,8 @@ from app.discounts.strategies import NoDiscount, SeasonalDiscount
 
 from app.observers import ProductSubject, LoggerObserver, EmailObserver
 
+from app.decorators import log_execution_time, log_function_call
+
 product_subject = ProductSubject()
 product_subject.attach(LoggerObserver())
 product_subject.attach(EmailObserver())
@@ -21,6 +23,8 @@ discount_strategy = SeasonalDiscount({12: 0.15, 1: 0.10})
 # discount_strategy = NoDiscount
 
 @router.get("/", response_model=list[ProductOut])
+@log_execution_time
+@log_function_call
 async def products(search: Optional[str] = None, db: Session=Depends(get_db)):
     if search:
         return db.query(Products).filter(Products.title.ilike(f"%{search}%")).all()
