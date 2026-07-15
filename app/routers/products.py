@@ -12,8 +12,8 @@ from app.discounts.strategies import NoDiscount, SeasonalDiscount
 from app.observers import ProductSubject, LoggerObserver, EmailObserver
 
 product_subject = ProductSubject()
-product_subject.attach(LoggerObserver)
-product_subject.attach(EmailObserver)
+product_subject.attach(LoggerObserver())
+product_subject.attach(EmailObserver())
 
 router = APIRouter(prefix="/products", tags=["products"], redirect_slashes=False)
 
