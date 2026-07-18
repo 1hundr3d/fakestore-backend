@@ -13,6 +13,8 @@ from app.observers import ProductSubject, LoggerObserver, EmailObserver
 
 from app.decorators import log_execution_time, log_function_call
 
+from app.notifications.factory import NotifierFactory
+
 product_subject = ProductSubject()
 product_subject.attach(LoggerObserver())
 product_subject.attach(EmailObserver())
@@ -59,9 +61,16 @@ async def products(search: Optional[str] = None, db: Session=Depends(get_db)):
 @router.post("/", response_model=ProductOut)
 async def create_product(product_data: ProductCreate, db: Session=Depends(get_db), current_user: UserDB=Depends(get_current_user)):
     new_product = Products(title = product_data.title, price = product_data.price, description = product_data.description, image = product_data.image)
+
     db.add(new_product)
     db.commit()
     db.refresh(new_product)
+
     delete_cache("products:list")
+
     product_subject.notify(f"Новый товар создан: {product_data.title}")
+
+    notifier = NotifierFactory.create_notifier("email")
+    notifier.send(f"Новый товар создан: {product_data.title}")
+    
     return new_product
