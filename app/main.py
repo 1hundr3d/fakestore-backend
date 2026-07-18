@@ -10,6 +10,7 @@ import logging
 import subprocess
 import os
 from prometheus_fastapi_instrumentator import Instrumentator
+from app.config import AppConfig
 
 # Настраиваем логгер
 logging.basicConfig(level=logging.INFO)
@@ -18,6 +19,9 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Функция жизненного цикла приложения"""
+    config = AppConfig()
+    config.display_config()
+
     logger.info("🚀 Сервер запускается...")
     
     # Выполняем миграции базы данных

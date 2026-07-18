@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 # Пользовательские модели
@@ -16,14 +16,13 @@ class UserLogin(BaseModel):
 
 # Модели для товаров
 class ProductOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     title: str
     price: float
     description: Optional[str] = None
     image: Optional[str] = None
-
-    class Config:
-        orm_mode = True
 
 class ProductCreate(BaseModel):
     title: str
